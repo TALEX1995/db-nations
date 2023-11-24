@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Scanner;
 
 public class Main {
 	//	SELECT countries.country_id, countries.name as country_name, regions.name as region_name, continents.name as continent_name
@@ -23,6 +24,16 @@ public class Main {
 		
 		
 		Connection conn = null;
+		
+//		User request
+		Scanner in = new Scanner(System.in);
+		System.out.println("Cerca in base alla nazione");
+		
+		String strNation = in.nextLine();
+		in.close();
+		
+		
+		
 		// Create connection witd db
 		try {
 			conn = DriverManager.getConnection(url, username, password);
@@ -31,15 +42,17 @@ public class Main {
 								+ "FROM countries " 
 								+ "JOIN regions ON countries.region_id = regions.region_id " 
 								+ "JOIN continents ON regions.continent_id = continents.continent_id " 
+								+ "WHERE countries.name LIKE CONCAT('%', ?, '%') "
 								+ "ORDER BY countries.name";
 			
-			
+			System.out.println(SQL);
 			try (PreparedStatement ps = conn.prepareStatement(SQL)){
 				
+				ps.setString(1, strNation);
+				
 				try(ResultSet rs = ps.executeQuery()){
-			    	
+					
 			    	while(rs.next()) {
-			    		
 			    		int country_id = rs.getInt(1);
 			    		String country_name = rs.getString(2);
 			    		String region_name = rs.getString(3);
