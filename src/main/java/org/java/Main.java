@@ -30,7 +30,7 @@ public class Main {
 		System.out.println("Cerca in base alla nazione");
 		
 		String strNation = in.nextLine();
-		in.close();
+		
 		
 		
 		
@@ -70,5 +70,48 @@ public class Main {
 	        	conn.close();
 	        }
 	    }
+		
+		
+		System.out.println("Inserisci l'id di una nazione(quella tra parentesi quadre) e ti dirò le lingue parlate e le statistiche");
+		String strCountryId = in.nextLine();
+		int countryId = Integer.parseInt(strCountryId);
+		
+		// Create connection witd db
+				try {
+					conn = DriverManager.getConnection(url, username, password);
+					
+					final String SQL = "SELECT languages.language, country_stats.year, country_stats.population, country_stats.gdp "
+							+ "FROM countries "
+							+ "JOIN country_languages ON country_languages.country_id = countries.country_id "
+							+ "JOIN languages ON country_languages.language_id = languages.language_id "
+							+ "JOIN country_stats ON country_stats.country_id = countries.country_id "
+							+ "WHERE countries.country_id = ? "
+							+ "AND country_stats.year > 2015";
+					System.out.println(SQL);
+					
+					try (PreparedStatement ps = conn.prepareStatement(SQL)){
+						
+						ps.setInt(1, countryId);
+						
+						try(ResultSet rs = ps.executeQuery()){
+							
+					    	while(rs.next()) {
+					    		String language = rs.getString(1);
+					    		int year = rs.getInt(2);
+					    		int population = rs.getInt(3);
+					    		String gdp = rs.getString(4);
+					    		
+					    		System.out.println("[" + language + "] - " + year + " - " + population + " - " + gdp);
+					    	}
+					    }
+					}
+					
+				}catch(Exception e) {
+					System.out.println(e.getMessage());
+				}finally {
+			        if(conn != null) {
+			        	conn.close();
+			        }
+			    }
 	}
 }
